@@ -74,7 +74,7 @@ else
                     @User.Identity.Name?.Substring(0, 1).ToUpper()
                 </div>
                 <div>
-                    <div class="user-name">@User.Identity.Name</div>
+                    <div class="user-name">@User.Identity.Name?.Split('@')[0]</div>
                     <div class="user-role">Développeur</div>
                 </div>
                 <form asp-area="Identity" asp-page="/Account/Logout"
