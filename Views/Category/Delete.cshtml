@@ -1,0 +1,38 @@
+@model TaskFlow.Models.Category
+
+    @{ 
+        ViewData["Title"] = "Supprimer catégories";
+    }
+    
+    <h1>Supprimer catégorie</h1>
+
+    <div class="alert alert-warning" role="alert">
+        Êtes vous sûre de vouloir supprimer la catégorie ?
+        Cette action est irréversible 
+    </div>
+
+    <dl class="row">
+        <dt class="col-sm-4">Nom</dt>
+        <dd class="col-sm-8">@Model.Name</dd>
+
+        <dt class="col-sm-4">Couleur</dt>
+        <dd class="col-sm-8">
+            <span style="display:inline-block; width:24px; height:24px;
+                        background-color:@Model.Color; border-radius:4px;
+                        border:1px solid #ccc;">
+            </span>
+            @Model.Color
+        </dd>
+    </dl>
+        @* Formulaire de confirmation - action="Delete" + méthode POST*@
+        <form asp-action="DeleteConfirmed" method="post">
+            @Html.AntiForgeryToken()
+            @* Id caché pour que le contrôleur sache quelle cat modifier*@
+            <input type="hidden" asp-for="Id"/>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+

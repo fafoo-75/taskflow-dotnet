@@ -1,0 +1,38 @@
+@model List<TaskFlow.Models.Category>
+
+@{
+    ViewData["Title"] = "Categories";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Mes categories</h1>
+    <a asp-action="Create" class="btn btn-primary">+ Nouvelle categorie</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Aucune categorie. Creez votre premiere categorie !
+    </div>
+}
+else
+{
+    <div class="list-group">
+        @foreach (var cat in Model)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <span style="width:14px;height:14px;border-radius:50%;background:@cat.Color;display:inline-block"></span>
+                    <span class="fw-medium">@cat.Name</span>
+                    <span class="badge bg-secondary">@cat.Tasks.Count tache(s)</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-action="Edit" asp-route-id="@cat.Id"
+                       class="btn btn-sm btn-outline-primary">Editer</a>
+                    <a asp-action="Delete" asp-route-id="@cat.Id"
+                       class="btn btn-sm btn-outline-danger">Supprimer</a>
+                </div>
+            </div>
+        }
+    </div>
+}

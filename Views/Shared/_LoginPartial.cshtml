@@ -1,0 +1,28 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+@if (SignInManager.IsSignedIn(User))
+{
+    @* Utilisateur connecté : affiche son email et le lien de déconnexion *@
+    <span class="navbar-text me-2">
+        Salut @UserManager.GetUserName(User)
+    </span>
+
+    <form asp-area="Identity" asp-page="/Account/Logout" 
+    asp-route-returnUrl="@Url.Action("Index", "Todo")"
+    method="post">
+    <button type="submit" class="btn btn-danger btn-sm">
+        Logout
+    </button>
+    </form>
+}
+else
+{
+    @* Si l'user n'est pas connecter, lien login et register *@
+    <a asp-area="Identity" asp-page="/Account/login"
+    class="btn btn-outline-light btn-sm me-1">Login</a>
+
+    <a asp-area="Identity" asp-page="/Account/Register"
+    class="btn btn-light btn-sm">Register</a>
+}

@@ -1,0 +1,42 @@
+@model TaskFlow.Models.TodoTask
+@{ ViewData["Title"] = "Supprimer la tâche"; }
+
+<h1>Confirmer la suppression</h1>
+
+<div class="alert alert-danger">
+    Vous allez supprimer définitivement <strong>@Model.Titre</strong>.
+    <br/>Cette action est irréversible.
+</div>
+
+@* Récapitulatif de la tâche à supprimer *@
+
+<dl class="row mb-4">
+    <dt class="col-sm-3">Titre</dt>
+    <dd class="col-sm-9">@Model.Titre</dd>
+
+    <dt class="col-sm-3">Priorité</dt>
+    <dd class="col-sm-9">@Model.Priorite</dd>
+
+    <dt class="col-sm-3">Échéance</dt>
+    <dd class="col-sm-9">@Model.DateEcheance.ToShortDateString()</dd>
+</dl>
+
+@* Formulaire de confirmation *@
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+
+    @* Champ caché Id - même principe que dans Edit.cshtml. *@
+    <input type="hidden" asp-for="Id"/>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-danger">
+            Oui, supprimer définitivement
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            Annuler
+        </a>
+    </div>
+
+</form>
+
+

@@ -1,0 +1,34 @@
+@model TaskFlow.Models.Category
+
+    @{ 
+        @* ViewData[Title] : définit le titre de l'onglet du navigateur
+        cette valeur est utilisée dans le _Layout.cshtml.*@
+        ViewData["Title"] = "Nouvelle catégories";
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1>Nouvelle catégorie</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary">← Retour</a>
+    </div>
+
+    <div class="col-md-5">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none"></div>
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" placeholder="Ex: Travail, perso..."/>
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Color" class="form-label"></label>
+                <input asp-for="Color" type="color" class="form-control form-control-color"/>
+                <span asp-validation-for="Color" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
+            </div>
+        </form>
+</div>
+@section Scripts {@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}}

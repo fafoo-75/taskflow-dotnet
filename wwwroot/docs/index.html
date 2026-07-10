@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaskFlow — Documentation</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #f5f6f8;
+    --text: #1a1d23;
+    --text-muted: #5b6270;
+    --border: #e1e4e8;
+    --accent: #3b5bdb;
+    --code-bg: #f0f1f4;
+    --code-text: #1a1d23;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --bg-alt: #1c1f26;
+      --text: #e6e8eb;
+      --text-muted: #9aa1ac;
+      --border: #2c313a;
+      --accent: #7c9cff;
+      --code-bg: #1e222a;
+      --code-text: #d7dbe0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 1.25rem;
+    background: var(--bg-alt);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-size: 1.1rem;
+    margin: 0;
+  }
+  .tabs {
+    display: flex;
+    gap: 0.5rem;
+  }
+  .tabs button {
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .tabs button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 58px;
+    height: calc(100vh - 58px);
+    overflow-y: auto;
+    padding: 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .sidebar input[type="search"] {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    margin-bottom: 0.75rem;
+  }
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sidebar li a {
+    display: block;
+    padding: 0.4rem 0.5rem;
+    border-radius: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .sidebar li a:hover {
+    background: var(--bg-alt);
+    color: var(--text);
+  }
+  main {
+    flex: 1;
+    min-width: 0;
+    padding: 1.5rem 2rem 4rem;
+  }
+  main section {
+    margin-bottom: 2.5rem;
+    scroll-margin-top: 70px;
+  }
+  main h2 {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+  }
+  main details {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    margin: 0.75rem 0;
+  }
+  main details summary {
+    cursor: pointer;
+    font-weight: 600;
+  }
+  code, pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    border-radius: 6px;
+  }
+  code {
+    padding: 0.1rem 0.35rem;
+    font-size: 0.9em;
+  }
+  pre {
+    padding: 0.9rem 1rem;
+    overflow-x: auto;
+  }
+  pre code {
+    padding: 0;
+    background: none;
+  }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TaskFlow — Documentation</h1>
+  <div class="tabs" role="tablist">
+    <button id="tab-guide-btn" role="tab" aria-pressed="true">Guide utilisateur</button>
+    <button id="tab-tech-btn" role="tab" aria-pressed="false">Documentation technique</button>
+  </div>
+</header>
+
+<div class="layout">
+  <nav id="sidebar-guide" class="sidebar" aria-label="Sommaire guide utilisateur">
+    <input type="search" id="search-guide" placeholder="Rechercher une section…">
+    <ul id="nav-guide">
+      <li><a href="#demarrage">Démarrage</a></li>
+      <li><a href="#dashboard">Dashboard</a></li>
+      <li><a href="#gerer-taches">Gérer ses tâches</a></li>
+      <li><a href="#filtrer-rechercher">Filtrer et rechercher</a></li>
+      <li><a href="#categories">Catégories</a></li>
+      <li><a href="#assigner-tache">Assigner une tâche</a></li>
+      <li><a href="#commentaires">Commentaires</a></li>
+      <li><a href="#pieces-jointes">Pièces jointes</a></li>
+      <li><a href="#faq">FAQ / erreurs courantes</a></li>
+    </ul>
+  </nav>
+  <nav id="sidebar-tech" class="sidebar" aria-label="Sommaire documentation technique" hidden>
+    <input type="search" id="search-tech" placeholder="Rechercher une section…">
+    <ul id="nav-tech">
+      <li><a href="#stack-architecture">Stack et architecture</a></li>
+      <li><a href="#modele-donnees">Modèle de données</a></li>
+      <li><a href="#cycle-requete">Cycle de vie d'une requête</a></li>
+      <li><a href="#securite-proprietaire">Sécurité par propriétaire</a></li>
+      <li><a href="#upload-fichiers">Upload de fichiers</a></li>
+      <li><a href="#pagination">Pagination</a></li>
+      <li><a href="#commandes-dev">Commandes de développement</a></li>
+      <li><a href="#points-attention">Points d'attention connus</a></li>
+    </ul>
+  </nav>
+
+  <main id="content-guide">
+
+<section id="demarrage">
+  <h2>Démarrage</h2>
+  <p>TaskFlow nécessite un compte pour accéder à vos tâches : chaque utilisateur ne voit que les tâches qu'il a créées.</p>
+  <details open>
+    <summary>Créer un compte</summary>
+    <p>Cliquez sur <strong>S'inscrire</strong> en haut de la page, renseignez votre email et un mot de passe (8 caractères minimum, avec au moins un chiffre). Aucune confirmation par email n'est requise : vous êtes connecté immédiatement après inscription.</p>
+  </details>
+  <details>
+    <summary>Se connecter / se déconnecter</summary>
+    <p>Utilisez <strong>Se connecter</strong> avec l'email et le mot de passe choisis à l'inscription. Le lien <strong>Se déconnecter</strong> apparaît en haut à droite une fois connecté.</p>
+  </details>
+</section>
+
+<section id="dashboard">
+  <h2>Dashboard</h2>
+  <p>La page d'accueil affiche un tableau de bord résumant l'état de vos tâches :</p>
+  <ul>
+    <li><strong>Total</strong> — nombre total de tâches que vous avez créées.</li>
+    <li><strong>Terminées</strong> — tâches cochées comme terminées.</li>
+    <li><strong>En cours</strong> — tâches non terminées dont l'échéance n'est pas dépassée.</li>
+    <li><strong>En retard</strong> — tâches non terminées dont l'échéance est dépassée.</li>
+    <li><strong>Pourcentage complété</strong> — calculé automatiquement (terminées / total).</li>
+  </ul>
+  <p>Le dashboard affiche aussi vos <strong>5 tâches les plus urgentes</strong> (non terminées, triées par priorité décroissante puis par date d'échéance).</p>
+</section>
+
+<section id="gerer-taches">
+  <h2>Gérer ses tâches</h2>
+  <details open>
+    <summary>Créer une tâche</summary>
+    <p>Depuis la liste des tâches, cliquez sur <strong>Créer</strong>. Champs disponibles :</p>
+    <ul>
+      <li><strong>Titre</strong> (obligatoire, 200 caractères max)</li>
+      <li><strong>Description</strong> (optionnelle, 1000 caractères max)</li>
+      <li><strong>Priorité</strong> — Basse, Moyenne ou Haute (Moyenne par défaut)</li>
+      <li><strong>Date d'échéance</strong> (obligatoire, 7 jours après aujourd'hui par défaut)</li>
+      <li><strong>Catégorie</strong> (optionnelle)</li>
+      <li><strong>Heures estimées</strong> (optionnelle, entre 0 et 1000)</li>
+      <li><strong>Assigné à</strong> (optionnel, voir la section « Assigner une tâche »)</li>
+    </ul>
+  </details>
+  <details>
+    <summary>Modifier ou marquer terminée</summary>
+    <p>Ouvrez une tâche et cliquez sur <strong>Modifier</strong> pour changer n'importe quel champ. Depuis la liste, une case à cocher permet de basculer rapidement le statut terminé/non terminé sans ouvrir le formulaire complet.</p>
+  </details>
+  <details>
+    <summary>Supprimer une tâche</summary>
+    <p>Une page de confirmation s'affiche avant toute suppression définitive — vos commentaires et pièces jointes associés sont supprimés avec la tâche.</p>
+  </details>
+</section>
+
+<section id="filtrer-rechercher">
+  <h2>Filtrer et rechercher</h2>
+  <p>La liste des tâches propose plusieurs filtres combinables :</p>
+  <ul>
+    <li><strong>Statut</strong> — en cours, terminées, ou priorité haute uniquement.</li>
+    <li><strong>Recherche texte</strong> — filtre les tâches dont le titre contient le texte saisi.</li>
+    <li><strong>Catégorie</strong> — n'affiche que les tâches de la catégorie choisie.</li>
+  </ul>
+  <p>Les tâches non terminées sont toujours affichées avant les tâches terminées, puis triées par date d'échéance. La liste est paginée par blocs de 10 tâches.</p>
+</section>
+
+<section id="categories">
+  <h2>Catégories</h2>
+  <p>Les catégories permettent de regrouper vos tâches (ex. Travail, Perso, Urgent, Entraînement — ces 4 catégories existent par défaut). Chaque catégorie a un nom et une couleur, modifiables ou supprimables à tout moment depuis <strong>Catégories</strong> dans le menu.</p>
+  <p><strong>Attention :</strong> si des tâches sont encore liées à une catégorie au moment de sa suppression, l'opération peut échouer — retirez ou réassignez d'abord la catégorie de ces tâches.</p>
+</section>
+
+<section id="assigner-tache">
+  <h2>Assigner une tâche</h2>
+  <p>Lors de la création ou de la modification d'une tâche, vous pouvez sélectionner un autre utilisateur dans le champ <strong>Assigné à</strong>. Son email s'affiche alors sur la tâche.</p>
+  <p><strong>Important :</strong> l'assignation est aujourd'hui purement informative. La tâche reste visible uniquement dans <em>votre</em> liste de tâches, pas dans celle de la personne assignée — elle sert à indiquer qui est responsable, pas à partager l'accès à la tâche.</p>
+</section>
+
+<section id="commentaires">
+  <h2>Commentaires</h2>
+  <p>Sur la page de détail d'une tâche, ajoutez un commentaire (1000 caractères max) via le formulaire en bas de page. Les commentaires sont affichés du plus récent au plus ancien, avec le nom de leur auteur. Vous ne pouvez supprimer que vos propres commentaires.</p>
+</section>
+
+<section id="pieces-jointes">
+  <h2>Pièces jointes</h2>
+  <p>Depuis la page de détail d'une tâche, vous pouvez joindre un fichier :</p>
+  <ul>
+    <li><strong>Taille maximale</strong> : 10 Mo par fichier.</li>
+    <li><strong>Types autorisés</strong> : PDF, Word (.doc/.docx), Excel (.xls/.xlsx), images (.png/.jpg/.jpeg), texte (.txt).</li>
+  </ul>
+  <p>Cliquez sur le nom d'un fichier pour le télécharger. Seul l'utilisateur propriétaire de la tâche peut voir, télécharger ou supprimer ses pièces jointes.</p>
+</section>
+
+<section id="faq">
+  <h2>FAQ / erreurs courantes</h2>
+  <details open>
+    <summary>Pourquoi je ne vois pas une tâche qui m'a été assignée ?</summary>
+    <p>C'est le comportement actuel de l'application : l'assignation est une simple étiquette, elle ne rend pas la tâche visible dans votre propre liste. Seul le créateur de la tâche la voit apparaître dans « Mes tâches ».</p>
+  </details>
+  <details>
+    <summary>« Type de fichier non autorisé » lors d'un envoi de pièce jointe</summary>
+    <p>Seules certaines extensions sont acceptées (voir la section « Pièces jointes »). Convertissez le fichier dans un format supporté avant de le joindre.</p>
+  </details>
+  <details>
+    <summary>« Le fichier est trop volumineux » lors d'un envoi de pièce jointe</summary>
+    <p>La taille maximale par fichier est de 10 Mo. Compressez le fichier ou réduisez sa taille avant de le joindre à nouveau.</p>
+  </details>
+</section>
+
+</main>
+  <main id="content-tech" hidden>
+
+<section id="stack-architecture">
+  <h2>Stack et architecture</h2>
+  <p>TaskFlow est une application <strong>ASP.NET Core MVC</strong> (.NET, cible <code>net10.0</code>), avec authentification <strong>ASP.NET Identity</strong> et base <strong>SQLite</strong> (<code>taskflow.db</code>).</p>
+  <p>Dans <code>Program.cs</code>, le pipeline de démarrage enregistre <code>AddDbContext&lt;AppDbContext&gt;</code> (SQLite), <code>AddDefaultIdentity&lt;IdentityUser&gt;</code> + <code>AddRoles&lt;IdentityRole&gt;</code> + <code>AddEntityFrameworkStores&lt;AppDbContext&gt;</code>. L'ordre <code>UseAuthentication()</code> avant <code>UseAuthorization()</code> est important : inversé, la connexion ne fonctionne plus.</p>
+  <pre><code>app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages(); // pages Identity (login/register)</code></pre>
+</section>
+
+<section id="modele-donnees">
+  <h2>Modèle de données</h2>
+  <p><code>AppDbContext</code> hérite de <code>IdentityDbContext&lt;IdentityUser&gt;</code> : les tables Identity (AspNetUsers, etc.) cohabitent avec les tables métier.</p>
+  <ul>
+    <li><strong>TodoTask</strong> — entité centrale. <code>CategoryId</code> (nullable) vers <code>Category</code>, <code>UserId</code> (propriétaire), <code>AssignedToUserId</code>/<code>AssignedToUserName</code> (assignation informative, nom dénormalisé), collections <code>Comments</code> et <code>Attachments</code>, enum <code>Priorite</code> (Basse/Moyenne/Haute).</li>
+    <li><strong>Category</strong> — <code>Name</code>, <code>Color</code>, collection <code>Tasks</code>.</li>
+    <li><strong>Comment</strong> — <code>Content</code>, <code>TaskId</code> (obligatoire), <code>UserId</code>/<code>UserName</code> dénormalisés pour éviter une jointure AspNetUsers à l'affichage.</li>
+    <li><strong>Attachment</strong> — <code>OriginalName</code> (nom affiché) distinct de <code>StoredName</code> (nom généré par GUID sur disque), <code>TaskId</code>, <code>UserId</code>.</li>
+    <li><strong>Tag</strong> — existe comme modèle et <code>DbSet&lt;Tag&gt;</code>, mais n'est pas encore relié à <code>TodoTask</code> (pas de table de jointure).</li>
+  </ul>
+  <p><code>OnModelCreating</code> seed des <code>Category</code> et <code>TodoTask</code> initiales via <code>HasData</code> — ces seeds ne doivent être modifiés que par une nouvelle migration, jamais en éditant une migration déjà appliquée.</p>
+</section>
+
+<section id="cycle-requete">
+  <h2>Cycle de vie d'une requête</h2>
+  <p>Le routing par convention (<code>{controller=Home}/{action=Index}/{id?}</code>) fait correspondre une URL à une méthode de contrôleur : par exemple <code>GET /Todo/Edit/5</code> appelle <code>TodoController.Edit(int id)</code>.</p>
+  <p>Chaque contrôleur suit le pattern <strong>PRG</strong> (Post-Redirect-Get) : après un POST réussi, on redirige toujours vers une action GET (généralement <code>Index</code>) plutôt que de renvoyer une vue directement, pour éviter la double soumission au rafraîchissement de page.</p>
+  <pre><code>await _context.SaveChangesAsync();
+TempData["Succes"] = "Tâche créée avec succès.";
+return RedirectToAction(nameof(Index));</code></pre>
+</section>
+
+<section id="securite-proprietaire">
+  <h2>Sécurité par propriétaire</h2>
+  <p>Tous les contrôleurs métier sont <code>[Authorize]</code>. Au-delà de ça, chaque accès à une entité filtre systématiquement par <code>UserId</code> pour empêcher un utilisateur d'accéder aux données d'un autre en modifiant l'Id dans l'URL :</p>
+  <pre><code>var userId = _userManager.GetUserId(User);
+
+var task = await _context.TodoTasks
+    .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+if (task == null)
+    return NotFound(); // 404, pas 403 : on ne révèle pas que la tâche existe</code></pre>
+  <p>Ce pattern doit être respecté pour toute nouvelle action touchant une entité liée à un utilisateur (voir <code>TodoController</code>, <code>CommentController</code>, <code>AttachmentController</code>).</p>
+</section>
+
+<section id="upload-fichiers">
+  <h2>Upload de fichiers</h2>
+  <p><code>AttachmentController.Upload</code> impose une taille maximale de 10 Mo et une whitelist d'extensions (<code>.pdf</code>, <code>.doc</code>, <code>.docx</code>, <code>.xls</code>, <code>.xlsx</code>, <code>.png</code>, <code>.jpg</code>, <code>.jpeg</code>, <code>.txt</code>). Le fichier est stocké sur disque dans <code>wwwroot/uploads</code> sous un nom généré par GUID (<code>StoredName</code>), distinct du nom original (<code>OriginalName</code>) affiché à l'utilisateur — cela évite les collisions de noms entre utilisateurs.</p>
+  <pre><code>var storedName = $"{Guid.NewGuid()}{extension}";
+var filePath = Path.Combine(_env.WebRootPath, "uploads", storedName);</code></pre>
+</section>
+
+<section id="pagination">
+  <h2>Pagination</h2>
+  <p><code>Helpers/PaginatedList&lt;T&gt;.CreateAsync(IQueryable&lt;T&gt; source, int pageIndex, int pageSize)</code> exécute lui-même le <code>Skip</code>/<code>Take</code> et compte le total en une seule requête paginée. Ne jamais appeler <code>.ToListAsync()</code> sur la requête avant de la lui passer, sinon la pagination charge toutes les lignes en mémoire avant de paginer.</p>
+  <pre><code>var paginatedTasks = await PaginatedList&lt;TodoTask&gt;.CreateAsync(
+    query.OrderBy(t => t.EstTerminee).ThenBy(t => t.DateEcheance),
+    pageNumber,
+    pageSize: 10
+);</code></pre>
+</section>
+
+<section id="commandes-dev">
+  <h2>Commandes de développement</h2>
+  <pre><code>dotnet build                     # Compiler le projet
+dotnet run                       # Lancer l'application
+dotnet watch run                 # Lancer avec hot-reload
+
+dotnet ef migrations add &lt;Nom&gt;   # Créer une migration après modif d'un modèle
+dotnet ef database update        # Appliquer les migrations à taskflow.db</code></pre>
+  <p>Il n'y a pas de suite de tests automatisés dans ce dépôt actuellement.</p>
+</section>
+
+<section id="points-attention">
+  <h2>Points d'attention connus</h2>
+  <ul>
+    <li><strong>Tag non relié</strong> — le modèle <code>Tag</code> existe et possède un <code>DbSet</code>, mais aucune relation n'existe encore avec <code>TodoTask</code>.</li>
+    <li><strong>Suppression de catégorie</strong> — <code>CategoryController.DeleteConfirmed</code> ne vérifie pas si des tâches sont encore liées avant de supprimer ; le <code>DELETE</code> peut échouer si une contrainte de clé étrangère stricte existe en base.</li>
+    <li><strong>Assignation de tâche</strong> — <code>AssignedToUserId</code> n'affecte pas la visibilité de la tâche : elle reste filtrée par <code>UserId</code> propriétaire dans toutes les requêtes (Index, Dashboard), pas par assignation.</li>
+  </ul>
+</section>
+
+</main>
+</div>
+
+<script>
+  function switchTab(tab) {
+    const isGuide = tab === 'guide';
+    document.getElementById('sidebar-guide').hidden = !isGuide;
+    document.getElementById('sidebar-tech').hidden = isGuide;
+    document.getElementById('content-guide').hidden = !isGuide;
+    document.getElementById('content-tech').hidden = isGuide;
+    document.getElementById('tab-guide-btn').setAttribute('aria-pressed', String(isGuide));
+    document.getElementById('tab-tech-btn').setAttribute('aria-pressed', String(!isGuide));
+    history.replaceState(null, '', '#' + tab);
+  }
+  document.getElementById('tab-guide-btn').addEventListener('click', () => switchTab('guide'));
+  document.getElementById('tab-tech-btn').addEventListener('click', () => switchTab('tech'));
+  switchTab(location.hash === '#tech' ? 'tech' : 'guide');
+
+  function wireSearch(inputId, navId) {
+    const input = document.getElementById(inputId);
+    const nav = document.getElementById(navId);
+    const items = Array.from(nav.querySelectorAll('li'));
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      items.forEach(li => {
+        const text = li.textContent.toLowerCase();
+        li.hidden = q.length > 0 && !text.includes(q);
+      });
+    });
+  }
+  wireSearch('search-guide', 'nav-guide');
+  wireSearch('search-tech', 'nav-tech');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+﻿@model TaskFlow.Models.DashboardViewModel
+
+@{ViewData["Title"] = "Tableau de bord";}
+
+@if (!User.Identity!.IsAuthenticated)
+{
+    <div class="text-center py-5">
+        <h1>TaskFlow</h1>
+        <p class="lead text-muted mb-4">Gérez vos tâches professionnelles simplement.</p>
+        <a asp-area="Identity" asp-page="/Account/Login"
+        class="btn btn-primary btn-lg me-2">Se connecter</a>
+        <a asp-area="Identity" asp-page="/Account/Register"
+        class="btn btn-outline-secondary btn-lg">Créer un compte</a>    
+    </div>
+}
+else{
+    @*Tableau de bord si connecté*@
+
+    <h2 class="h4 mb-4">Salut, @User.Identity.Name</h2>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-center border-primary">
+                <div class="card-body">
+                <div class="display-6 fw-bold text-primary">@Model.Total</div>
+                <div class="text-muted small">Tâches totales</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-success">
+                <div class="card-body">
+                <div class="display-6 fw-bold text-success">@Model.Completed</div>
+                <div class="text-muted small">Complète (@Model.CompletedPercentage%)</div>
+                </div>
+            </div>
+        </div> 
+        <div class="col-md-3">
+            <div class="card text-center border-warning">
+                <div class="card-body">
+                <div class="display-6 fw-bold text-warning">@Model.InProgress</div>
+                <div class="text-muted small">En cours</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center border-danger">
+                <div class="card-body">
+                <div class="display-6 fw-bold text-danger">@Model.Late</div>
+                <div class="text-muted small">En retard</div>
+                </div>
+            </div>
+        </div>        
+    </div>
+
+
+    @* Tâches prioritaires *@
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="h5 mb-0">Tâches prioritaires</h3>
+        <a asp-controller="Todo" asp-action="Index"
+        class="btn btn-sm btn-outline-primary">Afficher tout</a>
+    </div>
+
+    @if (!Model.TopTasks.Any())
+    {
+        <div class="alert alert-success">
+            Toutes les tâches ont été complétées !
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var task in Model.TopTasks)
+            {
+                <a asp-controller="Todo" asp-action="Edit" asp-route-id="@task.Id"
+                class="list-group-item list-group-item-action d-flex justify-content-between">
+                <div>
+                    <span class="fw-medium">@task.Titre</span>
+                    <small class="text-muted ms-2">
+                        - @task.DateEcheance.ToShortDateString()
+                    </small>
+                </div>
+                <span class="badge @(task.Priorite == TaskFlow.Models.Priorite.Haute ? "bg-danger" : 
+                task.Priorite == TaskFlow.Models.Priorite.Moyenne ? "bg-warning text-dark" : "bg-success")">
+                @task.Priorite
+                </span>
+                </a>
+            }
+        </div>
+    }
+
+}

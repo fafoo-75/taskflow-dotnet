@@ -1,0 +1,184 @@
+@model TaskFlow.Helpers.PaginatedList<TaskFlow.Models.TodoTask>
+
+@{
+    ViewData["Title"] = "Mes taches";
+}
+
+<h1>Mes taches</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ Nouvelle tache</a>
+</p>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Aucune tache. Creez votre premiere tache !
+    </div>
+}
+else
+{
+    <form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
+
+        <select name="filtre" class="form-select form-select-sm" style="width:auto"
+                onchange="this.form.submit()">
+            <option value="">Toutes les taches</option>
+            <option value="inprogress" selected="@(ViewBag.Filtre == "inprogress" ? "selected" : null)">Taches en cours</option>
+            <option value="completed"  selected="@(ViewBag.Filtre == "completed"  ? "selected" : null)">Taches terminees</option>
+            <option value="high"       selected="@(ViewBag.Filtre == "high"       ? "selected" : null)">Taches urgentes</option>
+        </select>
+
+        <select name="categoryId"
+                class="form-select form-select-sm"
+                style="width:auto"
+                asp-items="ViewBag.Categories"
+                onchange="this.form.submit()">
+            <option value="">Toutes les categories</option>
+        </select>
+
+        <input type="text" name="recherche"
+               value="@ViewBag.Recherche"
+               class="form-control form-control-sm"
+               style="width:200px"
+               placeholder="Rechercher..." />
+
+        <button type="submit" class="btn btn-sm btn-outline-secondary">Filtrer</button>
+        <a asp-action="Index" class="btn btn-sm btn-link">Reset</a>
+    </form>
+
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Titre</th>
+                <th>Priorite</th>
+                <th>Echeance</th>
+                <th>Heures est.</th>
+                <th>Statut</th>
+                <th>Assignee a</th>
+                <th>Commentaires</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var tache in Model)
+            {
+                <tr class="@(tache.EstTerminee ? "table-success" : "")">
+
+                    <td>
+                        @tache.Titre
+                        @if (tache.Category != null)
+                        {
+                            <span style="display:inline-flex;align-items:center;gap:5px">
+                                <span style="width:10px;height:10px;border-radius:50%;background:@tache.Category.Color;display:inline-block">
+                                </span>
+                                @tache.Category.Name
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">--</span>
+                        }
+                    </td>
+
+                    <td>@tache.Priorite</td>
+
+                    <td>@tache.DateEcheance.ToShortDateString()</td>
+
+                    <td>@(tache.EstimatedHour?.ToString() ?? "-")</td>
+
+                    <td>
+                        @if (tache.EstTerminee)
+                        {
+                            <span class="badge bg-success">Terminee</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-primary">En cours</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (!string.IsNullOrEmpty(tache.AssignedToUserName))
+                        {
+                            <span class="badge bg-secondary rounded-circle"
+                                  title="@tache.AssignedToUserName">
+                                @tache.AssignedToUserName[0].ToString().ToUpper()
+                            </span>
+                            <small class="text-muted ms-1">@tache.AssignedToUserName</small>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">--</span>
+                        }
+                    </td>
+
+                    <td>
+                        @if (tache.Comments.Any())
+                        {
+                            <span class="badge bg-secondary">@tache.Comments.Count</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+
+                    <td>
+                        <a asp-action="Details" asp-route-id="@tache.Id"
+                           class="btn btn-sm btn-outline-secondary">Voir</a>
+                        <a asp-action="Edit" asp-route-id="@tache.Id"
+                           class="btn btn-sm btn-outline-primary">Modifier</a>
+                        <a asp-action="Delete" asp-route-id="@tache.Id"
+                           class="btn btn-sm btn-outline-danger">Supprimer</a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="d-flex justify-content-between align-items-center mt-3">
+
+            <small class="text-muted">
+                Page @Model.PageIndex sur @Model.TotalPages
+                (@Model.TotalCount taches au total)
+            </small>
+
+            <ul class="pagination pagination-sm mb-0">
+
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-filtre="@ViewBag.Filtre"
+                       asp-route-recherche="@ViewBag.Recherche">Precedent
+                    </a>
+                </li>
+
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-pageNumber="@i"
+                           asp-route-filtre="@ViewBag.Filtre"
+                           asp-route-recherche="@ViewBag.Recherche">@i
+                        </a>
+                    </li>
+                }
+
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-filtre="@ViewBag.Filtre"
+                       asp-route-recherche="@ViewBag.Recherche">Suivant
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    }
+}
