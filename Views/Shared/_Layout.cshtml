@@ -1,146 +1,144 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TaskFlow</title>
 
-    @* Bootstrap n'est plus utilisé pour la structure principale
-       — notre CSS personnalisé le remplace.
-       On garde Bootstrap pour les utilitaires (btn, badge, alert). *@
+    @* Bootstrap en premier — pour les classes utilisées dans les vues *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    @* Notre CSS personnalisé — contient toutes les classes de la maquette *@
+    @* site.css par-dessus — classes de la maquette écrasent Bootstrap *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
 
-@* Structure principale : sidebar gauche + main droite
-   Identique à la maquette HTML. *@
-<div class="app">
+@if (!User.Identity!.IsAuthenticated)
+{
+    @* Page non connecté — juste le contenu sans sidebar *@
+    @RenderBody()
+}
+else
+{
+    <div class="app-shell">
 
-    @* ── SIDEBAR ───────────────────────────────────────── *@
-    <nav class="sidebar">
-
-        @* Logo + nom de l'app *@
-        <div class="sidebar-brand">
-            <div class="logo">T</div>
-            <div>
-                <div class="brand-name">TaskFlow</div>
-                <div class="brand-ver">ASP.NET Core 10</div>
-            </div>
-        </div>
-
-        @* Navigation principale *@
-        <div class="sidebar-nav">
-            <div class="nav-group">
-                <div class="nav-label">Navigation</div>
-
-                @* asp-controller + asp-action génèrent l'URL automatiquement.
-                   La classe "active" est ajoutée dynamiquement selon le contrôleur actif.
-                   ViewContext.RouteData.Values["controller"] = nom du contrôleur courant. *@
-                <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
-                   asp-controller="Home" asp-action="Index">
-                    <span class="icon">📊</span> Dashboard
-                </a>
-
-                <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Todo" ? "active" : "")"
-                   asp-controller="Todo" asp-action="Index">
-                    <span class="icon">✅</span> My Tasks
-                </a>
-
-                <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")"
-                   asp-controller="Category" asp-action="Index">
-                    <span class="icon">🏷️</span> Categories
-                </a>
+        @* ── SIDEBAR ──────────────────────────────────────────── *@
+        <nav class="sidebar">
+            <div class="sidebar-brand">
+                <div class="logo-mark">T</div>
+                <div>
+                    <div class="brand-text">TaskFlow</div>
+                    <div class="brand-sub">v1.0.0</div>
+                </div>
             </div>
 
-            <div class="nav-group">
-                <div class="nav-label">Quick Filters</div>
+            <div class="sidebar-nav">
+                <div class="nav-group">
+                    <div class="nav-group-label">Navigation</div>
 
-                @* Liens avec paramètres de route — asp-route-filtre passe ?filtre=xxx dans l'URL *@
-                <a class="nav-item" asp-controller="Todo" asp-action="Index"
-                   asp-route-filtre="inprogress">
-                    <span class="icon">🔵</span> In Progress
-                </a>
+                    <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")"
+                       asp-controller="Home" asp-action="Index">
+                        <span class="ni">📊</span> Tableau de bord
+                    </a>
 
-                <a class="nav-item" asp-controller="Todo" asp-action="Index"
-                   asp-route-filtre="completed">
-                    <span class="icon">🟢</span> Completed
-                </a>
+                    <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Todo" ? "active" : "")"
+                       asp-controller="Todo" asp-action="Index">
+                        <span class="ni">✅</span> Mes tâches
+                    </a>
 
-                <a class="nav-item" asp-controller="Todo" asp-action="Index"
-                   asp-route-filtre="high">
-                    <span class="icon">⚡</span> High Priority
-                </a>
+                    <a class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "active" : "")"
+                       asp-controller="Category" asp-action="Index">
+                        <span class="ni">🏷️</span> Catégories
+                    </a>
+                </div>
+
+                <div class="nav-group">
+                    <div class="nav-group-label">Filtres rapides</div>
+
+                    <a class="nav-item" asp-controller="Todo" asp-action="Index"
+                       asp-route-filtre="inprogress">
+                        <span class="ni">🔵</span> En cours
+                    </a>
+
+                    <a class="nav-item" asp-controller="Todo" asp-action="Index"
+                       asp-route-filtre="completed">
+                        <span class="ni">🟢</span> Terminées
+                    </a>
+
+                    <a class="nav-item" asp-controller="Todo" asp-action="Index"
+                       asp-route-filtre="high">
+                        <span class="ni">⚡</span> Haute priorité
+                    </a>
+                </div>
             </div>
-        </div>
 
-        @* Zone utilisateur connecté — en bas de la sidebar *@
-        <div class="sidebar-user">
-            @if (User.Identity!.IsAuthenticated)
-            {
-                @* Avatar avec initiale de l'email *@
-                <div class="avatar">
+            @* Zone utilisateur — en bas de la sidebar *@
+            <div class="sidebar-user">
+                <div class="user-avatar">
                     @User.Identity.Name?.Substring(0, 1).ToUpper()
                 </div>
                 <div>
                     <div class="user-name">@User.Identity.Name</div>
-                    <div class="user-role">Developer</div>
+                    <div class="user-role">Développeur</div>
                 </div>
-
-                @* Bouton de déconnexion — doit être un formulaire POST *@
                 <form asp-area="Identity" asp-page="/Account/Logout"
                       asp-route-returnUrl="@Url.Action("Index", "Home")"
                       method="post" style="margin-left:auto">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="logout" title="Logout">⏻</button>
+                    <button type="submit" class="logout-btn" title="Se déconnecter">⏻</button>
                 </form>
-            }
-        </div>
-    </nav>
-
-    @* ── CONTENU PRINCIPAL ─────────────────────────────── *@
-    <div class="main">
-
-        @* Topbar : titre de la page + actions contextuelles *@
-        <div class="topbar">
-            <div>
-                @* ViewData["Title"] = titre défini dans chaque vue *@
-                <div class="topbar-title">@ViewData["Title"]</div>
-                @* ViewData["Subtitle"] = sous-titre optionnel *@
-                @if (ViewData["Subtitle"] != null)
-                {
-                    <div class="topbar-sub">@ViewData["Subtitle"]</div>
-                }
             </div>
-            @* RenderSection "TopbarActions" : chaque vue peut injecter
-               ses propres boutons dans la topbar (ex: "+ New Task") *@
-            <div class="topbar-actions">
-                @await RenderSectionAsync("TopbarActions", required: false)
-            </div>
-        </div>
+        </nav>
 
-        @* Zone de contenu principal *@
-        <div class="content">
+        @* ── MAIN ─────────────────────────────────────────────── *@
+        <div class="main">
 
-            @* Message de confirmation TempData *@
-            @if (TempData["Succes"] != null)
-            {
-                <div class="toast success"
-                     style="position:static;margin-bottom:16px;border-radius:8px;display:flex">
-                    ✓ @TempData["Succes"]
+            @* Topbar — titre + actions contextuelles *@
+            <div class="topbar">
+                <div>
+                    <div class="topbar-title">@ViewData["Title"]</div>
+                    @if (ViewData["Subtitle"] != null)
+                    {
+                        <div class="topbar-sub">@ViewData["Subtitle"]</div>
+                    }
                 </div>
-            }
+                <div class="topbar-actions">
+                    @await RenderSectionAsync("TopbarActions", required: false)
+                </div>
+            </div>
 
-            @* Injection du contenu de chaque vue *@
-            @RenderBody()
+            @* Contenu principal *@
+            <div class="content">
 
+                @* Messages TempData *@
+                @if (TempData["Succes"] != null)
+                {
+                    <div class="toast success"
+                         style="position:static;margin-bottom:16px;display:flex;">
+                        ✓ @TempData["Succes"]
+                    </div>
+                }
+                @if (TempData["Erreur"] != null)
+                {
+                    <div class="toast error"
+                         style="position:static;margin-bottom:16px;display:flex;">
+                        ✕ @TempData["Erreur"]
+                    </div>
+                }
+
+                @RenderBody()
+
+            </div>
         </div>
     </div>
-</div>
+}
 
+@* Container des toasts animés *@
+<div class="toast-container" id="toastContainer"></div>
+
+@* Bootstrap JS *@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
