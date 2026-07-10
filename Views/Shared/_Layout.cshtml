@@ -4,19 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TaskFlow</title>
-
-    @* Bootstrap en premier — pour les classes utilisées dans les vues *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    @* site.css par-dessus — classes de la maquette écrasent Bootstrap *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
 
 @if (!User.Identity!.IsAuthenticated)
 {
-    @* Page non connecté — juste le contenu sans sidebar *@
     @RenderBody()
+    IgnoreSection("TopbarActions");
 }
 else
 {
@@ -93,7 +89,7 @@ else
         @* ── MAIN ─────────────────────────────────────────────── *@
         <div class="main">
 
-            @* Topbar — titre + actions contextuelles *@
+            @* Topbar *@
             <div class="topbar">
                 <div>
                     <div class="topbar-title">@ViewData["Title"]</div>
@@ -110,7 +106,6 @@ else
             @* Contenu principal *@
             <div class="content">
 
-                @* Messages TempData *@
                 @if (TempData["Succes"] != null)
                 {
                     <div class="toast success"
@@ -127,16 +122,13 @@ else
                 }
 
                 @RenderBody()
-
             </div>
         </div>
     </div>
 }
 
-@* Container des toasts animés *@
 <div class="toast-container" id="toastContainer"></div>
 
-@* Bootstrap JS *@
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
