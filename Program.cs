@@ -9,8 +9,26 @@ using Microsoft.OpenApi;
 
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (!string.IsNullOrEmpty(databaseUrl))
+{
+    // Produiction : PostgreSQL sur Railway
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseNpgsql(databaseUrl));
+}
+else
+{
+    // Développement : SQLite
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlite(
+            builder.Configuration.GetConnectionString("DefaultConnection")
+        ));
+}
+ 
 // Ajouter les services au conteneur.
 builder.Services.AddControllersWithViews();
 
@@ -83,6 +101,16 @@ builder.Services.AddOpenApi(options =>
 });
 
 var app = builder.Build();
+
+if (app.Environment.IsProduction())
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
+if (!app.Environment.IsDevelopment())
+    app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {
