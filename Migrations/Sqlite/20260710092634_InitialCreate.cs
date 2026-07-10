@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
+namespace TaskFlow.Migrations.Sqlite
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -48,6 +50,35 @@ namespace TaskFlow.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Color = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Color = table.Column<string>(type: "TEXT", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -156,19 +187,100 @@ namespace TaskFlow.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.UpdateData(
-                table: "TodoTasks",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateEcheance", "Titre" },
-                values: new object[] { new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified), "Allez au sport" });
+            migrationBuilder.CreateTable(
+                name: "TodoTasks",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    CategoryId = table.Column<int>(type: "INTEGER", nullable: true),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    Titre = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    Priorite = table.Column<int>(type: "INTEGER", nullable: false),
+                    EstTerminee = table.Column<bool>(type: "INTEGER", nullable: false),
+                    DateEcheance = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    AssignedToUserId = table.Column<string>(type: "TEXT", nullable: true),
+                    AssignedToUserName = table.Column<string>(type: "TEXT", nullable: true),
+                    EstimatedHour = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TodoTasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TodoTasks_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id");
+                });
 
-            migrationBuilder.UpdateData(
+            migrationBuilder.CreateTable(
+                name: "Attachments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OriginalName = table.Column<string>(type: "TEXT", nullable: false),
+                    StoredName = table.Column<string>(type: "TEXT", nullable: false),
+                    ContentType = table.Column<string>(type: "TEXT", nullable: false),
+                    Size = table.Column<long>(type: "INTEGER", nullable: false),
+                    UploadAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    TaskId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Attachments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Attachments_TodoTasks_TaskId",
+                        column: x => x.TaskId,
+                        principalTable: "TodoTasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Comments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Content = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    TaskId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserId = table.Column<string>(type: "TEXT", nullable: true),
+                    UserName = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Comments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Comments_TodoTasks_TaskId",
+                        column: x => x.TaskId,
+                        principalTable: "TodoTasks",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Color", "Name" },
+                values: new object[,]
+                {
+                    { 1, "#3b5bdb", "Travail" },
+                    { 2, "#16a34a", "Perso" },
+                    { 3, "#dc2626", "Urgent" },
+                    { 4, "#ea580c", "Entrainement" }
+                });
+
+            migrationBuilder.InsertData(
                 table: "TodoTasks",
-                keyColumn: "Id",
-                keyValue: 2,
-                columns: new[] { "DateEcheance", "Priorite", "Titre" },
-                values: new object[] { new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Unspecified), 0, "Allez encore au sport" });
+                columns: new[] { "Id", "AssignedToUserId", "AssignedToUserName", "CategoryId", "DateEcheance", "Description", "EstTerminee", "EstimatedHour", "Priorite", "Titre", "UserId" },
+                values: new object[,]
+                {
+                    { 1, null, null, null, new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc), null, false, null, 0, "Allez au sport", null },
+                    { 2, null, null, null, new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc), null, false, null, 0, "Allez encore au sport", null }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -206,6 +318,21 @@ namespace TaskFlow.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Attachments_TaskId",
+                table: "Attachments",
+                column: "TaskId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Comments_TaskId",
+                table: "Comments",
+                column: "TaskId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TodoTasks_CategoryId",
+                table: "TodoTasks",
+                column: "CategoryId");
         }
 
         /// <inheritdoc />
@@ -227,24 +354,25 @@ namespace TaskFlow.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Attachments");
+
+            migrationBuilder.DropTable(
+                name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "Tags");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
 
-            migrationBuilder.UpdateData(
-                table: "TodoTasks",
-                keyColumn: "Id",
-                keyValue: 1,
-                columns: new[] { "DateEcheance", "Titre" },
-                values: new object[] { new DateTime(2026, 8, 10, 0, 0, 0, 0, DateTimeKind.Unspecified), "Préparer le support de cours" });
+            migrationBuilder.DropTable(
+                name: "TodoTasks");
 
-            migrationBuilder.UpdateData(
-                table: "TodoTasks",
-                keyColumn: "Id",
-                keyValue: 2,
-                columns: new[] { "DateEcheance", "Priorite", "Titre" },
-                values: new object[] { new DateTime(2026, 7, 2, 0, 0, 0, 0, DateTimeKind.Unspecified), 2, "Installer le ventillateur du plafond" });
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

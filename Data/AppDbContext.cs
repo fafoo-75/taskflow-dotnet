@@ -10,6 +10,12 @@ namespace TaskFlow.Data
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options){ }
 
+        // Constructeur protégé nécessaire pour les contextes dérivés
+        // (SqliteAppDbContext / PostgresAppDbContext) qui portent chacun
+        // leur propre jeu de migrations.
+        protected AppDbContext(DbContextOptions options)
+            : base(options){ }
+
         public DbSet<TodoTask> TodoTasks { get; set; }
 
         // Table Categories - une ligne par ligne
@@ -36,19 +42,19 @@ namespace TaskFlow.Data
             (
                 new TodoTask 
                 { 
-                Id = 1, Titre = "Allez au sport" , 
-                Priorite = Priorite.Basse, 
-                EstTerminee = false, 
-                DateEcheance = new DateTime(2026, 7, 28)
+                Id = 1, Titre = "Allez au sport" ,
+                Priorite = Priorite.Basse,
+                EstTerminee = false,
+                DateEcheance = new DateTime(2026, 7, 28, 0, 0, 0, DateTimeKind.Utc)
                 },
 
                 new TodoTask 
                 { 
-                Id = 2, Titre = "Allez encore au sport" , 
-                Priorite = Priorite.Basse, 
-                EstTerminee = false, 
-                DateEcheance = new DateTime(2026, 7, 29)
-                }            
+                Id = 2, Titre = "Allez encore au sport" ,
+                Priorite = Priorite.Basse,
+                EstTerminee = false,
+                DateEcheance = new DateTime(2026, 7, 29, 0, 0, 0, DateTimeKind.Utc)
+                }
             );
         }
     }

@@ -8,11 +8,11 @@ using TaskFlow.Data;
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+namespace TaskFlow.Migrations.Sqlite
 {
-    [DbContext(typeof(AppDbContext))]
-    [Migration("20260703091133_AddUserIdToTodoTask")]
-    partial class AddUserIdToTodoTask
+    [DbContext(typeof(SqliteAppDbContext))]
+    [Migration("20260710092634_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -216,10 +216,155 @@ namespace TaskFlow.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Attachment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OriginalName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StoredName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UploadAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("Attachments");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Color = "#3b5bdb",
+                            Name = "Travail"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Color = "#16a34a",
+                            Name = "Perso"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Color = "#dc2626",
+                            Name = "Urgent"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Color = "#ea580c",
+                            Name = "Entrainement"
+                        });
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TaskId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskId");
+
+                    b.ToTable("Comments");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.TodoTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("AssignedToUserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AssignedToUserName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("DateEcheance")
@@ -230,6 +375,9 @@ namespace TaskFlow.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EstTerminee")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("EstimatedHour")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Priorite")
@@ -245,13 +393,15 @@ namespace TaskFlow.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.ToTable("TodoTasks");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            DateEcheance = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateEcheance = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             EstTerminee = false,
                             Priorite = 0,
                             Titre = "Allez au sport"
@@ -259,7 +409,7 @@ namespace TaskFlow.Migrations
                         new
                         {
                             Id = 2,
-                            DateEcheance = new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateEcheance = new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             EstTerminee = false,
                             Priorite = 0,
                             Titre = "Allez encore au sport"
@@ -315,6 +465,49 @@ namespace TaskFlow.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Attachment", b =>
+                {
+                    b.HasOne("TaskFlow.Models.TodoTask", "Task")
+                        .WithMany("Attachments")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Comment", b =>
+                {
+                    b.HasOne("TaskFlow.Models.TodoTask", "Task")
+                        .WithMany("Comments")
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Task");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.TodoTask", b =>
+                {
+                    b.HasOne("TaskFlow.Models.Category", "Category")
+                        .WithMany("Tasks")
+                        .HasForeignKey("CategoryId");
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Category", b =>
+                {
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.TodoTask", b =>
+                {
+                    b.Navigation("Attachments");
+
+                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

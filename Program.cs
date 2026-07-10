@@ -16,25 +16,30 @@ var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 
 if (!string.IsNullOrEmpty(databaseUrl))
 {
-    // Produiction : PostgreSQL sur Railway
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseNpgsql(databaseUrl));
+    // Production : PostgreSQL sur Railway.
+    // Railway fournit DATABASE_URL au format URI (postgresql://user:pass@host:port/db),
+    // que Npgsql ne sait pas lire directement. On le convertit en chaîne clé-valeur.
+    var connectionString = BuildNpgsqlConnectionString(databaseUrl);
+    builder.Services.AddDbContext<PostgresAppDbContext>(options =>
+        options.UseNpgsql(connectionString));
+
+    // Les contrôleurs et Identity injectent AppDbContext : on le fait résoudre
+    // vers le contexte PostgreSQL actif.
+    builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<PostgresAppDbContext>());
 }
 else
 {
     // Développement : SQLite
-    builder.Services.AddDbContext<AppDbContext>(options =>
+    builder.Services.AddDbContext<SqliteAppDbContext>(options =>
         options.UseSqlite(
             builder.Configuration.GetConnectionString("DefaultConnection")
         ));
+
+    builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<SqliteAppDbContext>());
 }
- 
+
 // Ajouter les services au conteneur.
 builder.Services.AddControllersWithViews();
-
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // AddDefaultIdentity pour enregistrer les services Identity
 // UserManager : Créer/modifier/supprimer des users
@@ -148,3 +153,32 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+// Convertit une URL PostgreSQL au format URI (fournie par Railway/Heroku)
+// en chaîne de connexion Npgsql clé-valeur.
+static string BuildNpgsqlConnectionString(string databaseUrl)
+{
+    // Si ce n'est pas une URI (déjà au format clé-valeur), on la retourne telle quelle.
+    if (!databaseUrl.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        && !databaseUrl.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        return databaseUrl;
+    }
+
+    var uri = new Uri(databaseUrl);
+    var userInfo = uri.UserInfo.Split(':', 2);
+
+    var builder = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.IsDefaultPort ? 5432 : uri.Port,
+        Username = Uri.UnescapeDataString(userInfo[0]),
+        Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty,
+        Database = uri.AbsolutePath.TrimStart('/'),
+        // Prefer : utilise TLS s'il est disponible, sinon connexion en clair.
+        // Compatible avec le réseau interne Railway (sans TLS) comme avec l'URL publique.
+        SslMode = Npgsql.SslMode.Prefer
+    };
+
+    return builder.ConnectionString;
+}

@@ -7,10 +7,10 @@ using TaskFlow.Data;
 
 #nullable disable
 
-namespace TaskFlow.Migrations
+namespace TaskFlow.Migrations.Sqlite
 {
-    [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(SqliteAppDbContext))]
+    partial class SqliteAppDbContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
@@ -326,6 +326,29 @@ namespace TaskFlow.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("TaskFlow.Models.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("TaskFlow.Models.TodoTask", b =>
                 {
                     b.Property<int>("Id")
@@ -375,7 +398,7 @@ namespace TaskFlow.Migrations
                         new
                         {
                             Id = 1,
-                            DateEcheance = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateEcheance = new DateTime(2026, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             EstTerminee = false,
                             Priorite = 0,
                             Titre = "Allez au sport"
@@ -383,7 +406,7 @@ namespace TaskFlow.Migrations
                         new
                         {
                             Id = 2,
-                            DateEcheance = new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DateEcheance = new DateTime(2026, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             EstTerminee = false,
                             Priorite = 0,
                             Titre = "Allez encore au sport"
