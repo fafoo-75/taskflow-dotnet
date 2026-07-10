@@ -1,38 +1,25 @@
 @model TaskFlow.Models.Category
+@{ ViewData["Title"] = "Supprimer la catégorie"; }
 
-    @{ 
-        ViewData["Title"] = "Supprimer catégories";
-    }
-    
-    <h1>Supprimer catégorie</h1>
+@section TopbarActions {
+    <a asp-action="Index" class="btn btn-secondary">← Retour</a>
+}
 
-    <div class="alert alert-warning" role="alert">
-        Êtes vous sûre de vouloir supprimer la catégorie ?
-        Cette action est irréversible 
-    </div>
-
-    <dl class="row">
-        <dt class="col-sm-4">Nom</dt>
-        <dd class="col-sm-8">@Model.Name</dd>
-
-        <dt class="col-sm-4">Couleur</dt>
-        <dd class="col-sm-8">
-            <span style="display:inline-block; width:24px; height:24px;
-                        background-color:@Model.Color; border-radius:4px;
-                        border:1px solid #ccc;">
-            </span>
-            @Model.Color
-        </dd>
-    </dl>
-        @* Formulaire de confirmation - action="Delete" + méthode POST*@
-        <form asp-action="DeleteConfirmed" method="post">
-            @Html.AntiForgeryToken()
-            @* Id caché pour que le contrôleur sache quelle cat modifier*@
-            <input type="hidden" asp-for="Id"/>
-
-            <div class="d-flex gap-2">
+<div style="max-width:400px;">
+    <div class="confirm-modal" style="box-shadow:none;border:1px solid var(--border);">
+        <div class="confirm-icon">🏷️</div>
+        <div class="confirm-title">Supprimer cette catégorie ?</div>
+        <div class="confirm-desc">
+            La catégorie <strong>@Model.Name</strong> sera supprimée.
+            Les @Model.Tasks.Count tâche(s) liée(s) n'auront plus de catégorie.
+        </div>
+        <div class="confirm-actions">
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+            <form asp-action="DeleteConfirmed" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
                 <button type="submit" class="btn btn-danger">Oui, supprimer</button>
-                <a asp-action="Index" class="btn btn-outline-secondary">Annuler</a>
-            </div>
-        </form>
-
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,42 +1,38 @@
 @model TaskFlow.Models.TodoTask
 @{ ViewData["Title"] = "Supprimer la tâche"; }
 
-<h1>Confirmer la suppression</h1>
+@section TopbarActions {
+    <a asp-action="Index" class="btn btn-secondary">← Retour</a>
+}
 
-<div class="alert alert-danger">
-    Vous allez supprimer définitivement <strong>@Model.Titre</strong>.
-    <br/>Cette action est irréversible.
-</div>
+<div style="max-width:420px;">
+    <div class="confirm-modal" style="box-shadow:none;border:1px solid var(--border);">
+        <div class="confirm-icon">🗑️</div>
+        <div class="confirm-title">Supprimer cette tâche ?</div>
+        <div class="confirm-desc">
+            "<strong>@Model.Titre</strong>" sera définitivement supprimée.
+            Cette action est irréversible.
+        </div>
 
-@* Récapitulatif de la tâche à supprimer *@
+        <!-- Récapitulatif -->
+        <div style="text-align:left;background:var(--bg);border-radius:6px;padding:12px 14px;margin-bottom:20px;font-size:13px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="color:var(--muted);">Priorité</span>
+                <span class="badge badge-@Model.Priorite.ToString().ToLower()">@Model.Priorite</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+                <span style="color:var(--muted);">Échéance</span>
+                <span>@Model.DateEcheance.ToShortDateString()</span>
+            </div>
+        </div>
 
-<dl class="row mb-4">
-    <dt class="col-sm-3">Titre</dt>
-    <dd class="col-sm-9">@Model.Titre</dd>
-
-    <dt class="col-sm-3">Priorité</dt>
-    <dd class="col-sm-9">@Model.Priorite</dd>
-
-    <dt class="col-sm-3">Échéance</dt>
-    <dd class="col-sm-9">@Model.DateEcheance.ToShortDateString()</dd>
-</dl>
-
-@* Formulaire de confirmation *@
-<form asp-action="DeleteConfirmed" method="post">
-    @Html.AntiForgeryToken()
-
-    @* Champ caché Id - même principe que dans Edit.cshtml. *@
-    <input type="hidden" asp-for="Id"/>
-
-    <div class="d-flex gap-2">
-        <button type="submit" class="btn btn-danger">
-            Oui, supprimer définitivement
-        </button>
-        <a asp-action="Index" class="btn btn-outline-secondary">
-            Annuler
-        </a>
+        <div class="confirm-actions">
+            <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+            <form asp-action="DeleteConfirmed" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <button type="submit" class="btn btn-danger">Oui, supprimer</button>
+            </form>
+        </div>
     </div>
-
-</form>
-
-
+</div>

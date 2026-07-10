@@ -1,119 +1,162 @@
 @model TaskFlow.Helpers.PaginatedList<TaskFlow.Models.TodoTask>
 
-@{ ViewData["Title"] = "My Tasks"; ViewData["Subtitle"] = "Manage and track your tasks"; }
-
-@* Bouton "+ New Task" injecté dans la topbar via la section *@
-@section TopbarActions {
-    <a asp-action="Create" class="btn btn-primary">+ New Task</a>
+@{
+    ViewData["Title"] = "Mes tâches";
+    ViewData["Subtitle"] = "Gérez et suivez vos tâches";
 }
 
-@* Filtres *@
-<form method="get" class="mb-3 d-flex gap-2 align-items-center flex-wrap">
-    <select name="filtre" class="form-select form-select-sm"
-            style="width:auto" onchange="this.form.submit()">
-        <option value="">All tasks</option>
-        <option value="inprogress"
-            selected="@(ViewBag.Filtre == "inprogress" ? "selected" : null)">In progress</option>
-        <option value="completed"
-            selected="@(ViewBag.Filtre == "completed" ? "selected" : null)">Completed</option>
-        <option value="high"
-            selected="@(ViewBag.Filtre == "high" ? "selected" : null)">High priority</option>
-    </select>
-    <select name="categoryId" class="form-select form-select-sm"
-            style="width:auto" asp-items="ViewBag.Categories"
-            onchange="this.form.submit()">
-        <option value="">All categories</option>
-    </select>
-    <input type="text" name="recherche" value="@ViewBag.Recherche"
-           class="form-control form-control-sm" style="width:200px"
-           placeholder="Search..." />
-    <a asp-action="Index" class="btn btn-sm btn-link">Clear</a>
-</form>
+@section TopbarActions {
+    <a asp-action="Create" class="btn btn-primary">+ Nouvelle tâche</a>
+}
+
+<!-- Filtres -->
+<div class="filters-row">
+    <form method="get" style="display:contents">
+        <a class="filter-btn @(ViewBag.Filtre == null ? "active" : "")"
+           asp-action="Index">Toutes</a>
+        <a class="filter-btn @(ViewBag.Filtre == "inprogress" ? "active" : "")"
+           asp-action="Index" asp-route-filtre="inprogress">En cours</a>
+        <a class="filter-btn @(ViewBag.Filtre == "completed" ? "active" : "")"
+           asp-action="Index" asp-route-filtre="completed">Terminées</a>
+        <a class="filter-btn @(ViewBag.Filtre == "high" ? "active" : "")"
+           asp-action="Index" asp-route-filtre="high">Haute priorité</a>
+
+        <div class="filters-right">
+            <input type="text" name="recherche"
+                   value="@ViewBag.Recherche"
+                   class="search-input"
+                   placeholder="Rechercher..."
+                   onchange="this.form.submit()" />
+            <select name="categoryId"
+                    class="sort-select"
+                    asp-items="ViewBag.Categories"
+                    onchange="this.form.submit()">
+                <option value="">Toutes les catégories</option>
+            </select>
+        </div>
+    </form>
+</div>
 
 @if (!Model.Any())
 {
-    <div style="text-align:center;padding:40px;color:var(--muted)">
-        No tasks yet. <a asp-action="Create">Create your first task →</a>
+    <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <div class="empty-title">Aucune tâche</div>
+        <p>Créez votre première tâche pour commencer.</p>
     </div>
 }
 else
 {
-    @* Tableau avec les classes CSS de la maquette *@
     <div class="task-table">
-        <div class="task-thead">
-            <span>Title</span>
-            <span>Priority</span>
-            <span>Status</span>
-            <span>Due Date</span>
+        <div class="task-table-header">
+            <span>Titre</span>
+            <span>Priorité</span>
+            <span>Statut</span>
+            <span>Échéance</span>
             <span></span>
         </div>
 
-        @foreach (var task in Model)
+        @foreach (var tache in Model)
         {
-            @* Classe "done" sur la ligne si la tâche est terminée
-               → le CSS applique le texte barré *@
-            <div class="task-row @(task.EstTerminee ? "done" : "")">
+            <div class="task-row @(tache.EstTerminee ? "done" : "")">
 
                 <div class="task-title-cell">
-                    @* Bouton toggle inline *@
-                    <form asp-action="ToggleTerminee" asp-route-id="@task.Id"
+                    <!-- Bouton toggle checkbox -->
+                    <form asp-action="ToggleTerminee" asp-route-id="@tache.Id"
                           method="post" style="display:contents">
                         @Html.AntiForgeryToken()
                         <button type="submit"
-                                style="width:16px;height:16px;border:1.5px solid var(--border2);
-                                       border-radius:4px;background:@(task.EstTerminee?"var(--green)":"#fff");
-                                       color:#fff;cursor:pointer;font-size:10px;flex-shrink:0">
-                            @(task.EstTerminee ? "✓" : "")
+                                class="task-checkbox @(tache.EstTerminee ? "checked" : "")">
                         </button>
                     </form>
-                    <div style="min-width:0">
-                        <div class="task-title">@task.Titre</div>
-                        @if (!string.IsNullOrEmpty(task.Description))
+                    <div>
+                        <div class="task-name">@tache.Titre</div>
+                        @if (!string.IsNullOrEmpty(tache.Description))
                         {
-                            <div class="task-desc">@task.Description</div>
+                            <div class="task-desc">@tache.Description</div>
+                        }
+                        @if (tache.Category != null)
+                        {
+                            <span style="display:inline-flex;align-items:center;gap:4px;margin-top:2px;">
+                                <span style="width:8px;height:8px;border-radius:50%;
+                                       background:@tache.Category.Color;display:inline-block;"></span>
+                                <span style="font-size:11px;color:var(--muted);">@tache.Category.Name</span>
+                            </span>
                         }
                     </div>
                 </div>
 
-                @* Badge de priorité — classe CSS selon la valeur de l'enum *@
                 <div>
-                    <span class="badge badge-@task.Priorite.ToString().ToLower()">
-                        @task.Priorite
+                    <span class="badge badge-@tache.Priorite.ToString().ToLower()">
+                        @tache.Priorite
                     </span>
                 </div>
 
-                @* Badge de statut — calculé selon IsCompleted et DueDate *@
                 <div>
-                    @if (task.EstTerminee)
+                    @if (tache.EstTerminee)
                     {
-                        <span class="badge badge-done">Completed</span>
+                        <span class="badge badge-terminee">Terminée</span>
                     }
-                    else if (task.DateEcheance < DateTime.Today)
+                    else if (tache.DateEcheance < DateTime.Today)
                     {
-                        <span class="badge badge-late">Late</span>
+                        <span class="badge badge-retard">En retard</span>
                     }
                     else
                     {
-                        <span class="badge badge-progress">In Progress</span>
+                        <span class="badge badge-encours">En cours</span>
                     }
                 </div>
 
-                @* Date avec classe "late" si dépassée *@
-                <div class="date-cell @(task.DateEcheance < DateTime.Today && !task.EstTerminee ? "late" : "")">
-                    @task.DateEcheance.ToShortDateString()
+                <div class="date-cell @(tache.DateEcheance < DateTime.Today && !tache.EstTerminee ? "retard" : "")">
+                    @tache.DateEcheance.ToShortDateString()
                 </div>
 
-                @* Boutons d'action *@
                 <div class="task-actions">
-                    <a asp-action="Details" asp-route-id="@task.Id"
-                       class="btn btn-sm btn-secondary">View</a>
-                    <a asp-action="Edit" asp-route-id="@task.Id"
-                       class="btn btn-sm btn-secondary">✏️</a>
-                    <a asp-action="Delete" asp-route-id="@task.Id"
-                       class="btn btn-sm btn-danger">🗑</a>
+                    <a asp-action="Details" asp-route-id="@tache.Id"
+                       class="btn btn-secondary btn-sm">Voir</a>
+                    <a asp-action="Edit" asp-route-id="@tache.Id"
+                       class="btn btn-secondary btn-sm btn-icon">✏️</a>
+                    <a asp-action="Delete" asp-route-id="@tache.Id"
+                       class="btn btn-danger btn-sm btn-icon">🗑</a>
                 </div>
 
             </div>
         }
     </div>
+
+    <!-- Pagination -->
+    @if (Model.TotalPages > 1)
+    {
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+            <small style="color:var(--muted);">
+                Page @Model.PageIndex sur @Model.TotalPages (@Model.TotalCount tâches)
+            </small>
+            <div style="display:flex;gap:4px;">
+                @if (Model.HasPreviousPage)
+                {
+                    <a class="btn btn-secondary btn-sm"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex - 1)"
+                       asp-route-filtre="@ViewBag.Filtre"
+                       asp-route-recherche="@ViewBag.Recherche">← Préc.</a>
+                }
+                @for (var i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a class="btn @(i == Model.PageIndex ? "btn-primary" : "btn-secondary") btn-sm"
+                       asp-action="Index"
+                       asp-route-pageNumber="@i"
+                       asp-route-filtre="@ViewBag.Filtre"
+                       asp-route-recherche="@ViewBag.Recherche">@i</a>
+                }
+                @if (Model.HasNextPage)
+                {
+                    <a class="btn btn-secondary btn-sm"
+                       asp-action="Index"
+                       asp-route-pageNumber="@(Model.PageIndex + 1)"
+                       asp-route-filtre="@ViewBag.Filtre"
+                       asp-route-recherche="@ViewBag.Recherche">Suiv. →</a>
+                }
+            </div>
+        </div>
+    }
 }
