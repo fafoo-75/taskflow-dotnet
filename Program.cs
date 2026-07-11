@@ -11,6 +11,12 @@ using Microsoft.OpenApi;
 
 
 
+// Autorise Npgsql à écrire des DateTime Kind=Unspecified (dates saisies dans les
+// formulaires) dans des colonnes timestamp. Sans ça : « Cannot write DateTime with
+// Kind=Unspecified to PostgreSQL type 'timestamp with time zone' » → 500 à la
+// création de tâche. Doit être défini avant toute utilisation de Npgsql.
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
