@@ -1,11 +1,16 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using TaskFlow.Models;
 
 namespace TaskFlow.Data
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser>
+    // IDataProtectionKeyContext : permet de stocker les clés de chiffrement
+    // ASP.NET (antiforgery, cookies d'auth) dans la base plutôt que dans le
+    // système de fichiers éphémère du conteneur Railway.
+    public class AppDbContext : IdentityDbContext<IdentityUser>, IDataProtectionKeyContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options){ }
@@ -26,6 +31,22 @@ namespace TaskFlow.Data
         public DbSet<Attachment> Attachments { get; set; }
 
         public DbSet<Tag> Tags { get; set; }
+
+        // Table des clés de chiffrement Data Protection.
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+
+            // La longueur des colonnes clés Identity (varchar(128) vs text) diffère
+            // de façon non déterministe entre le runtime et l'outil « dotnet ef ».
+            // Cet écart est purement cosmétique (mêmes chaînes stockées), donc on
+            // empêche EF de bloquer le démarrage/migration à cause de ce faux positif.
+            optionsBuilder.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId.PendingModelChangesWarning));
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.Data;
 using Microsoft.IdentityModel.Tokens;
@@ -37,6 +38,12 @@ else
 
     builder.Services.AddScoped<AppDbContext>(sp => sp.GetRequiredService<SqliteAppDbContext>());
 }
+
+// Persiste les clés de chiffrement (antiforgery, cookies d'auth) dans la base.
+// Sans ça, Railway régénère les clés à chaque redémarrage du conteneur
+// (filesystem éphémère) → « antiforgery token could not be decrypted » → 500.
+builder.Services.AddDataProtection()
+    .PersistKeysToDbContext<AppDbContext>();
 
 // Ajouter les services au conteneur.
 builder.Services.AddControllersWithViews();
